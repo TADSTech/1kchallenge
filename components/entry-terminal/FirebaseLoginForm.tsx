@@ -11,11 +11,13 @@ import type { LoginFormValues } from '@/lib/types';
 
 interface FirebaseLoginFormProps {
   onLoginSuccess: () => void;
+  onLoginError: () => void;
   onSwitchToSignup: () => void;
 }
 
 export function FirebaseLoginForm({
   onLoginSuccess,
+  onLoginError,
   onSwitchToSignup,
 }: FirebaseLoginFormProps) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -43,7 +45,7 @@ export function FirebaseLoginForm({
       
       onLoginSuccess();
     } catch {
-      // Error handled by AuthContext
+      onLoginError();
     } finally {
       setIsLoggingIn(false);
     }

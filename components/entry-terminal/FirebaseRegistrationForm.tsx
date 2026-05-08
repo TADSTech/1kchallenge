@@ -11,11 +11,13 @@ import type { RegistrationFormValues } from '@/lib/types';
 
 interface FirebaseRegistrationFormProps {
   onRegisterSuccess: (username: string) => void;
+  onRegisterError: () => void;
   onSwitchToLogin: () => void;
 }
 
 export function FirebaseRegistrationForm({
   onRegisterSuccess,
+  onRegisterError,
   onSwitchToLogin,
 }: FirebaseRegistrationFormProps) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -47,7 +49,7 @@ export function FirebaseRegistrationForm({
       onRegisterSuccess(data.username);
       reset();
     } catch {
-      // Error handled by AuthContext
+      onRegisterError();
     } finally {
       setIsRegistering(false);
     }

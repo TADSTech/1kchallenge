@@ -1,12 +1,9 @@
-import * as Brevo from '@getbrevo/brevo';
+import { BrevoClient } from '@getbrevo/brevo';
 
-// @ts-expect-error: Brevo types are missing in this version
-const apiInstance = new Brevo.TransactionalEmailsApi();
-
-// Initialize API key
 const apiKey = process.env.BREVO_API_KEY || '';
-// @ts-expect-error: Brevo types are missing in this version
-apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
+
+// Initialize client if apiKey exists
+const client = apiKey ? new BrevoClient({ apiKey }) : null;
 
 export interface EmailRecipient {
   email: string;
@@ -17,8 +14,8 @@ export async function sendChallengeReminder(
   recipients: EmailRecipient[],
   type: '3-days' | '1-day' | 'start'
 ) {
-  if (!apiKey) {
-    console.error('BREVO_API_KEY is not set');
+  if (!client) {
+    console.error('BREVO_API_KEY is not set or client initialization failed');
     return;
   }
 
@@ -55,15 +52,14 @@ export async function sendChallengeReminder(
     `,
   };
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.subject = subjectMap[type];
-  sendSmtpEmail.htmlContent = contentMap[type];
-  sendSmtpEmail.sender = { name: 'TADS 1K Challenge', email: 'noreply@tadstech.dev' };
-  sendSmtpEmail.to = recipients.map(r => ({ email: r.email, name: r.name }));
-
   try {
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    // API called successfully.
+    const data = await client.transactionalEmails.sendTransacEmail({
+      subject: subjectMap[type],
+      htmlContent: contentMap[type],
+      sender: { name: 'TADS 1K Challenge', email: 'noreply@tadstech.dev' },
+      to: recipients.map(r => ({ email: r.email, name: r.name })),
+    });
+    
     return data;
   } catch (error) {
     console.error('Error calling Brevo API:', error);

@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock IntersectionObserver for Framer Motion whileInView
 global.IntersectionObserver = class IntersectionObserver {
