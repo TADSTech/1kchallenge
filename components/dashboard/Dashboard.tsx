@@ -32,6 +32,10 @@ export function Dashboard() {
   const currentBalance = logs.reduce((acc, log) => acc + log.amount, 0);
   const isPending = logs.some(log => log.status === 'PENDING');
 
+  const CHALLENGE_START_DATE = new Date('2026-05-11T00:00:00');
+  const isChallengeStarted = new Date() >= CHALLENGE_START_DATE;
+
+
   if (isLoading) {
     return (
       <div className="w-full max-w-4xl mx-auto my-32 text-center font-mono">
@@ -63,7 +67,11 @@ export function Dashboard() {
             </motion.div>
           </div>
 
-          <AddLogButton onAdd={() => setIsModalOpen(true)} />
+          <AddLogButton 
+            onAdd={() => setIsModalOpen(true)} 
+            isDisabled={!isChallengeStarted}
+          />
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 mt-12">
             <AnimatePresence mode="popLayout">

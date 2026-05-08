@@ -7,11 +7,13 @@ import {
   query, 
   doc, 
   updateDoc, 
+  deleteDoc,
   onSnapshot,
   orderBy
 } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, User, Clock, Search, Lock, Unlock, Key } from 'lucide-react';
+import { Shield, User, Clock, Search, Lock, Unlock, Key, Trash2 } from 'lucide-react';
+
 import { GlitchText } from '@/components/shared/GlitchText';
 import { AccountLog } from '@/lib/types';
 
@@ -100,6 +102,20 @@ export default function AdminPage() {
       alert('[SYSTEM_ERROR] Verification failed.');
     }
   };
+
+  const handleDeleteLog = async (logId: string) => {
+    if (!selectedUser) return;
+    if (!confirm('Are you sure you want to permanently delete this log? This cannot be undone.')) return;
+
+    try {
+      await deleteDoc(doc(firebaseFirestore, `users/${selectedUser}/logs`, logId));
+      alert('[SYSTEM_OK] Log purged from ledger.');
+    } catch (err) {
+      console.error(err);
+      alert('[SYSTEM_ERROR] Deletion failed.');
+    }
+  };
+
 
   if (!isAuthenticated) {
     return (
@@ -263,16 +279,24 @@ export default function AdminPage() {
                             </div>
                           </div>
 
-                          {log.status === 'PENDING' && (
-                            <div className="flex gap-2">
+                          <div className="flex gap-2">
+                            {log.status === 'PENDING' && (
                               <button 
                                 onClick={() => handleVerifyLog(log.id)}
                                 className="px-4 py-2 bg-cyberLime/10 hover:bg-cyberLime text-cyberLime hover:text-black border border-cyberLime transition-all rounded text-[10px] font-bold uppercase tracking-widest"
                               >
                                 APPROVE_BROADCAST
                               </button>
-                            </div>
-                          )}
+                            )}
+                            <button 
+                              onClick={() => handleDeleteLog(log.id)}
+                              className="p-2 bg-alertOrange/10 hover:bg-alertOrange text-alertOrange hover:text-white border border-alertOrange/30 transition-all rounded"
+                              title="Delete Log"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+
                         </div>
                       </div>
                     ))}

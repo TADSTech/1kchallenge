@@ -5,93 +5,66 @@ import { useForm } from 'react-hook-form';
 import { TerminalInput } from './TerminalInput';
 import { MagneticButton } from '@/components/shared/MagneticButton';
 import { GlitchText } from '@/components/shared/GlitchText';
-import { validateRequired, validateEmail, validatePassword } from '@/lib/validation';
+import { validateRequired } from '@/lib/validation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import type { RegistrationFormValues } from '@/lib/types';
+import type { LoginFormValues } from '@/lib/types';
 
-interface FirebaseRegistrationFormProps {
-  onRegisterSuccess: (username: string) => void;
-  onSwitchToLogin: () => void;
+interface FirebaseLoginFormProps {
+  onLoginSuccess: () => void;
+  onSwitchToSignup: () => void;
 }
 
-export function FirebaseRegistrationForm({
-  onRegisterSuccess,
-  onSwitchToLogin,
-}: FirebaseRegistrationFormProps) {
-  const [isRegistering, setIsRegistering] = useState(false);
+export function FirebaseLoginForm({
+  onLoginSuccess,
+  onSwitchToSignup,
+}: FirebaseLoginFormProps) {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   const {
-    register: registerUser,
+    login: loginUser,
   } = useAuth();
-
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<RegistrationFormValues>({
+  } = useForm<LoginFormValues>({
     mode: 'onBlur',
   });
 
-  const onSubmit = async (data: RegistrationFormValues) => {
-    setIsRegistering(true);
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoggingIn(true);
     
     try {
-      await registerUser(
-        data.email,
+      await loginUser(
+        data.identifier,
         data.password,
-        data.username,
       );
       
-      onRegisterSuccess(data.username);
-      reset();
+      onLoginSuccess();
     } catch {
       // Error handled by AuthContext
     } finally {
-      setIsRegistering(false);
+      setIsLoggingIn(false);
     }
   };
 
 
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-      {/* Username input */}
+      {/* Identifier input (Email or Username) */}
       <TerminalInput
-        id="username"
-        label="Username"
+        id="identifier"
+        label="Username / Email"
         type="text"
-        placeholder="Enter username"
+        placeholder="Enter username or email"
         autoComplete="username"
-        error={errors.username?.message}
-        disabled={isRegistering}
-        {...register('username', {
+        error={errors.identifier?.message}
+        disabled={isLoggingIn}
+        {...register('identifier', {
           validate: (value) => {
             if (!validateRequired(value)) {
-              return 'Username is required';
-            }
-            return true;
-          },
-        })}
-      />
-
-      {/* Email input */}
-      <TerminalInput
-        id="email"
-        label="Email Address"
-        type="email"
-        placeholder="Enter email"
-        autoComplete="email"
-        error={errors.email?.message}
-        disabled={isRegistering}
-        {...register('email', {
-          validate: (value) => {
-            if (!validateRequired(value)) {
-              return 'Email is required';
-            }
-            if (!validateEmail(value)) {
-              return 'Invalid email format';
+              return 'Identifier is required';
             }
             return true;
           },
@@ -103,17 +76,14 @@ export function FirebaseRegistrationForm({
         id="password"
         label="Password"
         type="password"
-        placeholder="Choose a secure password"
-        autoComplete="new-password"
+        placeholder="Enter your password"
+        autoComplete="current-password"
         error={errors.password?.message}
-        disabled={isRegistering}
+        disabled={isLoggingIn}
         {...register('password', {
           validate: (value) => {
             if (!validateRequired(value)) {
               return 'Password is required';
-            }
-            if (!validatePassword(value)) {
-              return 'Password must be at least 6 characters';
             }
             return true;
           },
@@ -124,8 +94,8 @@ export function FirebaseRegistrationForm({
       <div className="pt-6 flex flex-col gap-6">
         <MagneticButton
           type="submit"
-          aria-label="Commit to challenge"
-          disabled={isRegistering}
+          aria-label="Login to account"
+          disabled={isLoggingIn}
           className="
             bg-voidBlack 
             border-2 
@@ -147,26 +117,25 @@ export function FirebaseRegistrationForm({
             tracking-widest
           "
         >
-          {isRegistering ? (
+          {isLoggingIn ? (
             <div className="flex items-center gap-3">
               <div className="animate-spin text-cyberLime/60">⟳</div>
-              <span>REGISTERING...</span>
+              <span>AUTHENTICATING...</span>
             </div>
           ) : (
-            <GlitchText>COMMENCE PROTOCOL</GlitchText>
+            <GlitchText>LOGIN PROTOCOL</GlitchText>
           )}
         </MagneticButton>
 
         <button
           type="button"
-          onClick={onSwitchToLogin}
-          disabled={isRegistering}
+          onClick={onSwitchToSignup}
+          disabled={isLoggingIn}
           className="text-cyberLime/40 hover:text-cyberLime text-[10px] uppercase tracking-[0.3em] font-mono transition-colors text-left"
         >
-          &gt; Already have an account? Login.sh
+          &gt; New operative? Register.sh
         </button>
       </div>
-
 
     </form>
   );

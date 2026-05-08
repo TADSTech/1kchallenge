@@ -5,19 +5,23 @@ service cloud.firestore {
     
     // User Profiles & Account Logs
     match /users/{userId} {
-      // Users can only access their own profile
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow read for username lookups (login/registration)
+      // Allow write only for the owner
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+
       
       match /logs/{logId} {
         // Users can read/write their own logs
         allow read, write: if request.auth != null && request.auth.uid == userId;
         
-        // ADMIN OVERRIDE: Allow admin to read and update logs for verification
+        // ADMIN OVERRIDE: Allow admin to read, update, and delete logs for verification
         // Replace 'YOUR_ADMIN_UID' with your actual Firebase Auth UID after first login
-        allow read, update: if request.auth != null && (
+        allow read, update, delete: if request.auth != null && (
           request.auth.token.email == 'tadstech@tadstech.dev' || 
           request.auth.uid == '7I8NMZxZQIa2q317Mom57LFo8O42'
         );
+
       }
     }
     

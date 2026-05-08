@@ -2,21 +2,26 @@
 
 import { useState } from 'react';
 import { FirebaseRegistrationForm } from './FirebaseRegistrationForm';
+import { FirebaseLoginForm } from './FirebaseLoginForm';
 import { MagneticButton } from '@/components/shared/MagneticButton';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { useFirebaseAuth } from '@/lib/hooks/useFirebaseAuth';
 
 export function EntryTerminal() {
   const { user, isLoading: authLoading, error: authError, logout } = useAuth();
-  const { isLoading: formLoading, error: formError } = useFirebaseAuth();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const [showLogin, setShowLogin] = useState(false);
 
   const handleRegisterSuccess = (username: string) => {
     setSuccessMessage(`[OK] Registration committed for ${username}.`);
   };
 
-  const handleRegisterError = () => {
+  const handleLoginSuccess = () => {
+    setSuccessMessage(`[OK] Session established. Access granted.`);
+    setShowLogin(false);
+  };
+
+  const handleAuthError = () => {
     setSuccessMessage(null);
   };
 
@@ -29,7 +34,7 @@ export function EntryTerminal() {
     }
   };
 
-  const isLoading = authLoading || formLoading;
+  const isLoading = authLoading;
 
   if (isLoading) {
     return (
@@ -85,21 +90,11 @@ export function EntryTerminal() {
             <span className="ml-4 text-cyberLime/60 text-[10px] tracking-widest uppercase">login.sh</span>
           </div>
           <div className="p-8">
-            <div className="text-cyberLime text-sm mb-6">
-              <p className="opacity-50">$ ./login.sh</p>
-              <p className="text-cyberLime/40 mt-2">Initializing login protocol...</p>
-            </div>
-            <div className="text-alertOrange font-bold mt-8">
-              [SYSTEM_ERROR] Login module not yet deployed.
-            </div>
-            <div className="mt-10">
-              <MagneticButton
-                onClick={() => setShowLogin(false)}
-                className="text-cyberLime/60 hover:text-cyberLime transition-colors uppercase tracking-widest text-xs"
-              >
-                &lt; Return to Signup
-              </MagneticButton>
-            </div>
+            <FirebaseLoginForm
+              onLoginSuccess={handleLoginSuccess}
+              onLoginError={handleAuthError}
+              onSwitchToSignup={() => setShowLogin(false)}
+            />
           </div>
         </div>
       </section>
@@ -121,29 +116,39 @@ export function EntryTerminal() {
         {successMessage ? (
           <div className="p-8">
             <div className="text-cyberLime text-sm mb-6">
-              <p className="opacity-50">$ ./register_challenge.sh</p>
-              <p className="text-cyberLime/40 mt-2">Processing registration...</p>
+              <p className="opacity-50">$ ./entry_protocol.sh</p>
+              <p className="text-cyberLime/40 mt-2">Processing...</p>
             </div>
             <div className="text-cyberLime font-bold text-xl mt-8">
               {successMessage}
+            </div>
+            <div className="mt-10">
+              <MagneticButton
+                onClick={() => setSuccessMessage(null)}
+                className="text-cyberLime/60 hover:text-cyberLime transition-colors uppercase tracking-widest text-xs"
+              >
+                &gt; Return to Terminal
+              </MagneticButton>
             </div>
           </div>
         ) : (
           <div className="p-8">
             <FirebaseRegistrationForm
               onRegisterSuccess={handleRegisterSuccess}
-              onRegisterError={handleRegisterError}
+              onRegisterError={handleAuthError}
+              onSwitchToLogin={() => setShowLogin(true)}
             />
           </div>
         )}
 
         {/* Error message display */}
-        {(formError || authError) && (
-          <div className="text-alertOrange text-sm mt-4 px-8 pb-8">
-            {formError || authError}
+        {authError && (
+          <div className="text-alertOrange text-sm mt-4 px-8 pb-8 uppercase tracking-widest font-bold">
+            [SYSTEM_ERROR] {authError}
           </div>
         )}
       </div>
     </section>
   );
 }
+

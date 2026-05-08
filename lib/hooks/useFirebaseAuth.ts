@@ -8,7 +8,7 @@ import {
   AuthError,
 } from 'firebase/auth';
 import { firebaseAuth, firebaseFirestore } from '../firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import type { User } from './useAuth';
 
 interface RegisterOptions {
@@ -18,7 +18,7 @@ interface RegisterOptions {
 }
 
 interface LoginOptions {
-  email: string;
+  identifier: string; // email or username
   password: string;
 }
 
@@ -38,16 +38,17 @@ export function useFirebaseAuth() {
         setError('Password should be at least 6 characters.');
         break;
       case 'auth/user-not-found':
-        setError('No account found with this email.');
+        setError('No account found with this identifier.');
         break;
       case 'auth/wrong-password':
+      case 'auth/invalid-credential':
         setError('Incorrect password.');
         break;
       case 'auth/network-request-failed':
         setError('Network error. Please check your connection and try again.');
         break;
       default:
-        setError('Registration failed. Please try again.');
+        setError(firebaseError.message || 'Authentication failed. Please try again.');
     }
   };
 
@@ -56,6 +57,14 @@ export function useFirebaseAuth() {
     setError(null);
 
     try {
+      // First check if username is taken
+      const q = query(collection(firebaseFirestore, 'users'), where('username', '==', username), limit(1));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        setError('Username already taken. Access denied.');
+        throw new Error('Username taken');
+      }
+
       const userCredential: UserCredential = await createUserWithEmailAndPassword(
         firebaseAuth,
         email,
@@ -77,6 +86,9 @@ export function useFirebaseAuth() {
 
       return user;
     } catch (err) {
+      if (err instanceof Error && err.message === 'Username taken') {
+        throw err;
+      }
       handleFirebaseError(err as AuthError);
       throw error;
     } finally {
@@ -84,11 +96,28 @@ export function useFirebaseAuth() {
     }
   };
 
-  const login = async ({ email, password }: LoginOptions): Promise<User> => {
+  const login = async ({ identifier, password }: LoginOptions): Promise<User> => {
     setIsLoading(true);
     setError(null);
 
     try {
+      let email = identifier;
+
+      // Check if identifier is an email (contains @)
+      if (!identifier.includes('@')) {
+        // Try to look up email by username
+        const q = query(collection(firebaseFirestore, 'users'), where('username', '==', identifier), limit(1));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          setError('No user found with that username.');
+          throw new Error('User not found');
+        }
+        
+        const userData = querySnapshot.docs[0].data();
+        email = userData.email;
+      }
+
       const userCredential: UserCredential = await signInWithEmailAndPassword(
         firebaseAuth,
         email,
@@ -102,12 +131,16 @@ export function useFirebaseAuth() {
 
       return user;
     } catch (err) {
+      if (err instanceof Error && err.message === 'User not found') {
+        throw err;
+      }
       handleFirebaseError(err as AuthError);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return {
     register,

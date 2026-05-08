@@ -6,9 +6,10 @@ import {
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  AuthError,
 } from 'firebase/auth';
 import { firebaseAuth, firebaseFirestore } from '../firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, query, where, getDocs, limit, getDoc } from 'firebase/firestore';
 
 export type AuthState = 'unauthenticated' | 'authenticating' | 'authenticated';
 
@@ -22,13 +23,33 @@ interface AuthContextType {
   user: User | null;
   authState: AuthState;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   register: (email: string, password: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
   error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const handleAuthError = (err: AuthError): string => {
+  switch (err.code) {
+    case 'auth/email-already-in-use':
+      return 'Email already registered. Access denied.';
+    case 'auth/invalid-email':
+      return 'Invalid email format. Check your input.';
+    case 'auth/weak-password':
+      return 'Password too weak. Security compromised.';
+    case 'auth/user-not-found':
+      return 'No account found with this identifier.';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Incorrect credentials. Authentication failed.';
+    case 'auth/network-request-failed':
+      return 'Network disruption detected. Check connection.';
+    default:
+      return err.message || 'Authentication protocol failure.';
+  }
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -37,11 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Fetch username from Firestore
+        const userDoc = await getDoc(doc(firebaseFirestore, 'users', firebaseUser.uid));
+        const userData = userDoc.data();
+        
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
+          username: userData?.username,
         });
         setAuthState('authenticated');
       } else {
@@ -54,19 +80,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     setAuthState('authenticating');
     setError(null);
 
     try {
+      let email = identifier;
+
+      // Username lookup
+      if (!identifier.includes('@')) {
+        const q = query(collection(firebaseFirestore, 'users'), where('username', '==', identifier), limit(1));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          throw { code: 'auth/user-not-found' } as AuthError;
+        }
+        
+        const userData = querySnapshot.docs[0].data();
+        email = userData.email;
+      }
+
       const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      
+      // Get additional info from Firestore
+      const userDoc = await getDoc(doc(firebaseFirestore, 'users', userCredential.user.uid));
+      const userData = userDoc.data();
+
       setUser({
         uid: userCredential.user.uid,
         email: userCredential.user.email,
+        username: userData?.username,
       });
       setAuthState('authenticated');
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      const msg = handleAuthError(err as AuthError);
+      setError(msg);
+      setAuthState('unauthenticated');
       throw err;
     }
   };
@@ -76,6 +125,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      // Username uniqueness check
+      const q = query(collection(firebaseFirestore, 'users'), where('username', '==', username), limit(1));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        throw new Error('USERNAME_TAKEN');
+      }
+
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
 
       const newUser: User = {
@@ -94,7 +150,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(newUser);
       setAuthState('authenticated');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      let msg = 'Registration failed.';
+      if (err instanceof Error && err.message === 'USERNAME_TAKEN') {
+        msg = 'Username already claimed by another operative.';
+      } else {
+        msg = handleAuthError(err as AuthError);
+      }
+      setError(msg);
+      setAuthState('unauthenticated');
       throw err;
     }
   };
@@ -104,11 +167,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await firebaseSignOut(firebaseAuth);
       setUser(null);
       setAuthState('unauthenticated');
+      setError(null);
     } catch (err) {
-      setError('Failed to logout');
+      setError('Failed to terminate session.');
       throw err;
     }
   };
+
 
   return (
     <AuthContext.Provider

@@ -73,6 +73,18 @@ export function validateRequired(s: string): boolean {
 }
 
 /**
+ * Validates password strength
+ * Returns true if the password is at least 6 characters long
+ * 
+ * @param s - The password to validate
+ * @returns true if valid password, false otherwise
+ */
+export function validatePassword(s: string): boolean {
+  return s.length >= 6;
+}
+
+
+/**
  * Validates that a MIME type is one of the accepted image formats
  * Accepted types: image/png, image/jpeg, image/webp
  * 

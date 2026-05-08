@@ -11,7 +11,14 @@ export interface AccountLog {
 export interface RegistrationFormValues {
   username: string;   // required, non-empty
   email: string;      // required, valid email format
+  password: string;   // required, min 6 chars
 }
+
+export interface LoginFormValues {
+  identifier: string; // email or username
+  password: string;
+}
+
 
 export type VaultState = 'idle' | 'drag-over' | 'verifying' | 'success' | 'error';
 
