@@ -9,8 +9,12 @@ import {
   updateDoc, 
   deleteDoc,
   onSnapshot,
-  orderBy
+  orderBy,
+  increment,
+  serverTimestamp
 } from 'firebase/firestore';
+
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, User, Clock, Search, Lock, Unlock, Key, Trash2 } from 'lucide-react';
 
@@ -103,16 +107,26 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteLog = async (logId: string) => {
+  const handleDeleteLog = async (log: AccountLog) => {
     if (!selectedUser) return;
-    if (!confirm('Are you sure you want to permanently delete this log? This cannot be undone.')) return;
+    if (!confirm(`Are you sure you want to permanently delete this log for $${log.amount}? This will also deduct the amount from the leaderboard.`)) return;
 
     try {
-      await deleteDoc(doc(firebaseFirestore, `users/${selectedUser}/logs`, logId));
-      alert('[SYSTEM_OK] Log purged from ledger.');
+      // 1. Delete the log
+      await deleteDoc(doc(firebaseFirestore, `users/${selectedUser}/logs`, log.id));
+      
+      // 2. Decrement the user's balance in the leaderboard
+      const userRef = doc(firebaseFirestore, 'leaderboard', selectedUser);
+      await updateDoc(userRef, {
+        balance: increment(-log.amount),
+        lastUpdated: serverTimestamp()
+      });
+
+
+      alert('[SYSTEM_OK] Log purged from ledger and leaderboard updated.');
     } catch (err) {
       console.error(err);
-      alert('[SYSTEM_ERROR] Deletion failed.');
+      alert('[SYSTEM_ERROR] Deletion failed or leaderboard update failed.');
     }
   };
 
@@ -289,7 +303,7 @@ export default function AdminPage() {
                               </button>
                             )}
                             <button 
-                              onClick={() => handleDeleteLog(log.id)}
+                              onClick={() => handleDeleteLog(log)}
                               className="p-2 bg-alertOrange/10 hover:bg-alertOrange text-alertOrange hover:text-white border border-alertOrange/30 transition-all rounded"
                               title="Delete Log"
                             >
