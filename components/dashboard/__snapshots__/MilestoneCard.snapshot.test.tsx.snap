@@ -1,0 +1,177 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MilestoneCard Snapshots > matches snapshot for PENDING milestone 1`] = `
+<div
+  class="glass border-4 border-[#39FF14] p-6 rounded-lg font-mono"
+  style="opacity: 0;"
+>
+  <h3
+    class="text-xl font-bold text-white mb-4 uppercase tracking-wide"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    First $100
+  </h3>
+  <div
+    class="flex items-center gap-2 mb-4 text-[#39FF14]"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-calendar"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 2v4"
+      />
+      <path
+        d="M16 2v4"
+      />
+      <rect
+        height="18"
+        rx="2"
+        width="18"
+        x="3"
+        y="4"
+      />
+      <path
+        d="M3 10h18"
+      />
+    </svg>
+    <span
+      class="text-sm"
+    >
+      Target: 
+      Mar 15, 2024
+    </span>
+  </div>
+  <div
+    class="flex items-center gap-2"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-clock"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      style="color: rgb(255, 95, 31);"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
+      <polyline
+        points="12 6 12 12 16 14"
+      />
+    </svg>
+    <span
+      class="text-sm font-bold uppercase tracking-wider"
+      style="color: rgb(255, 95, 31);"
+    >
+      PENDING
+    </span>
+  </div>
+</div>
+`;
+
+exports[`MilestoneCard Snapshots > matches snapshot for VERIFIED milestone 1`] = `
+<div
+  class="glass border-4 border-[#39FF14] p-6 rounded-lg font-mono"
+  style="opacity: 0;"
+>
+  <h3
+    class="text-xl font-bold text-white mb-4 uppercase tracking-wide"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    Reach $500
+  </h3>
+  <div
+    class="flex items-center gap-2 mb-4 text-[#39FF14]"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-calendar"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 2v4"
+      />
+      <path
+        d="M16 2v4"
+      />
+      <rect
+        height="18"
+        rx="2"
+        width="18"
+        x="3"
+        y="4"
+      />
+      <path
+        d="M3 10h18"
+      />
+    </svg>
+    <span
+      class="text-sm"
+    >
+      Target: 
+      Apr 1, 2024
+    </span>
+  </div>
+  <div
+    class="flex items-center gap-2"
+    style="opacity: 0; transform: translateX(-10px);"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-circle-check-big"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      style="color: rgb(57, 255, 20);"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M22 11.08V12a10 10 0 1 1-5.93-9.14"
+      />
+      <path
+        d="m9 11 3 3L22 4"
+      />
+    </svg>
+    <span
+      class="text-sm font-bold uppercase tracking-wider"
+      style="color: rgb(57, 255, 20);"
+    >
+      VERIFIED
+    </span>
+  </div>
+</div>
+`;

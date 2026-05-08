@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 57, 255, 20;
+  --background-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  margin: 0;
+  padding: 0;
+}
+
+/* Scanline animation keyframe */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* CRT flicker animation keyframe */
+@keyframes crtFlicker {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* Idle pulsing border for Evidence Vault */
+@keyframes pulse {
+  0%, 100% {
+    border-color: #FF5F1F;
+    box-shadow: 0 0 5px #FF5F1F;
+  }
+  50% {
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Neon glow text-shadow utility - softened */
+  .neon-glow {
+    text-shadow: 
+      0 0 1px #39FF14,
+      0 0 2px rgba(57, 255, 20, 0.2);
+  }
+
+  /* Glassmorphism utility */
+  .glass {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Global focus style for accessibility */
+  *:focus-visible {
+    outline: 2px solid #39FF14;
+    outline-offset: 2px;
+  }
+}
+

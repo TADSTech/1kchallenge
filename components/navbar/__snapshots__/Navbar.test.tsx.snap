@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Navbar > matches snapshot and confirms all three navigation links are present 1`] = `
+<nav
+  aria-label="Main navigation"
+  class="fixed top-0 left-0 right-0 w-full glass border-b-4 border-[#39FF14] z-50"
+  style="transform: translateY(-100px);"
+>
+  <div
+    class="container mx-auto px-6 py-4"
+  >
+    <div
+      class="flex items-center justify-center gap-8"
+    >
+      <a
+        class="font-mono text-[#39FF14] hover:text-white transition-colors duration-200 uppercase tracking-wider text-sm font-bold"
+        href="#entry-terminal"
+      >
+        Entry Terminal
+      </a>
+      <a
+        class="font-mono text-[#39FF14] hover:text-white transition-colors duration-200 uppercase tracking-wider text-sm font-bold"
+        href="#dashboard"
+      >
+        Dashboard
+      </a>
+      <a
+        class="font-mono text-[#39FF14] hover:text-white transition-colors duration-200 uppercase tracking-wider text-sm font-bold"
+        href="#evidence-vault"
+      >
+        Evidence Vault
+      </a>
+    </div>
+  </div>
+</nav>
+`;
