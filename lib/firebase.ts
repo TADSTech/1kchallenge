@@ -1,6 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
+import { getFirestore as getFirestoreLite } from 'firebase/firestore/lite';
 import { getStorage } from 'firebase/storage';
 
 // Firebase configuration (from environment variables)
@@ -16,7 +17,15 @@ const firebaseConfig = {
 // Initialize Firebase (singleton pattern)
 const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const firebaseAuth = getAuth(firebaseApp);
-const firebaseFirestore = getFirestore(firebaseApp);
+
+const firebaseFirestore = typeof window === 'undefined' 
+  ? initializeFirestore(firebaseApp, {
+      experimentalForceLongPolling: true,
+    })
+  : getFirestore(firebaseApp);
+
+const firebaseFirestoreLite = getFirestoreLite(firebaseApp);
+
 const firebaseStorage = getStorage(firebaseApp);
 
-export { firebaseApp, firebaseAuth, firebaseFirestore, firebaseStorage };
+export { firebaseApp, firebaseAuth, firebaseFirestore, firebaseFirestoreLite, firebaseStorage };

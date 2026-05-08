@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { firebaseFirestore } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { firebaseFirestoreLite } from '@/lib/firebase';
+import { collection, getDocs } from 'firebase/firestore/lite';
 import { sendChallengeReminder } from '@/lib/brevo';
 
 /**
@@ -39,12 +39,15 @@ export async function GET(request: Request) {
   
   try {
     // 2. Fetch all registered challengers
-    const usersSnapshot = await getDocs(collection(firebaseFirestore, 'users'));
+    const usersSnapshot = await getDocs(collection(firebaseFirestoreLite, 'users'));
     const recipients = usersSnapshot.docs
-      .map(doc => ({
-        email: doc.data().email,
-        name: doc.data().username || 'Challenger',
-      }))
+      .map(doc => {
+        const data = doc.data();
+        return {
+          email: data.email,
+          name: data.username || 'Challenger',
+        };
+      })
       .filter(r => r.email); // Ensure valid email exists
     
     if (recipients.length === 0) {
