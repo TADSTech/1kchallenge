@@ -60,11 +60,11 @@ export async function GET(request: Request) {
       recipients: recipients.length,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Notification system failure:', error);
     return NextResponse.json({ 
       error: 'Failed to process notifications',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

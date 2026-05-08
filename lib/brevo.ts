@@ -1,10 +1,12 @@
-import * as SibApiV3Sdk from '@getbrevo/brevo';
+import * as Brevo from '@getbrevo/brevo';
 
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+// @ts-expect-error: Brevo types are missing in this version
+const apiInstance = new Brevo.TransactionalEmailsApi();
 
 // Initialize API key
 const apiKey = process.env.BREVO_API_KEY || '';
-apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, apiKey);
+// @ts-expect-error: Brevo types are missing in this version
+apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
 export interface EmailRecipient {
   email: string;
@@ -53,7 +55,7 @@ export async function sendChallengeReminder(
     `,
   };
 
-  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
   sendSmtpEmail.subject = subjectMap[type];
   sendSmtpEmail.htmlContent = contentMap[type];
   sendSmtpEmail.sender = { name: 'TADS 1K Challenge', email: 'noreply@tadstech.dev' };
@@ -61,7 +63,7 @@ export async function sendChallengeReminder(
 
   try {
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('API called successfully. Returned data: ' + JSON.stringify(data));
+    // API called successfully.
     return data;
   } catch (error) {
     console.error('Error calling Brevo API:', error);

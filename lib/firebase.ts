@@ -1,6 +1,7 @@
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Firebase configuration (from environment variables)
 const firebaseConfig = {
@@ -13,17 +14,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (singleton pattern)
-let firebaseApp: FirebaseApp;
-let firebaseAuth: Auth;
-let firebaseFirestore: Firestore;
+const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+const firebaseAuth = getAuth(firebaseApp);
+const firebaseFirestore = getFirestore(firebaseApp);
+const firebaseStorage = getStorage(firebaseApp);
 
-if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig);
-} else {
-  firebaseApp = getApps()[0];
-}
-
-firebaseAuth = getAuth(firebaseApp);
-firebaseFirestore = getFirestore(firebaseApp);
-
-export { firebaseApp, firebaseAuth, firebaseFirestore };
+export { firebaseApp, firebaseAuth, firebaseFirestore, firebaseStorage };

@@ -2,12 +2,40 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // User Profiles & Account Logs
     match /users/{userId} {
-      // Allow authenticated users to read their own data
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Users can only access their own profile
+      allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // Allow authenticated users to write (create/update) their own data
+      match /logs/{logId} {
+        // Users can read/write their own logs
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // ADMIN OVERRIDE: Allow admin to read and update logs for verification
+        // Replace 'YOUR_ADMIN_UID' with your actual Firebase Auth UID after first login
+        allow read, update: if request.auth != null && (
+          request.auth.token.email == 'tadstech@tadstech.dev' || 
+          request.auth.uid == '7I8NMZxZQIa2q317Mom57LFo8O42'
+        );
+      }
+    }
+    
+    // Global Leaderboard
+    match /leaderboard/{userId} {
+      // Everyone can read the rankings
+      allow read: if true;
+      
+      // Users can only update their own ranking entry
       allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Admin can update any ranking
+      allow write: if request.auth != null && request.auth.token.email == 'tadstech@tadstech.dev';
+    }
+
+    // Global Admin Access for User List
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.token.email == 'tadstech@tadstech.dev';
     }
   }
 }

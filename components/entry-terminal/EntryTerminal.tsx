@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { FirebaseRegistrationForm } from './FirebaseRegistrationForm';
 import { MagneticButton } from '@/components/shared/MagneticButton';
-import { GlitchText } from '@/components/shared/GlitchText';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useFirebaseAuth } from '@/lib/hooks/useFirebaseAuth';
 
 export function EntryTerminal() {
-  const { user, authState, isLoading: authLoading, error: authError, logout } = useAuth();
+  const { user, isLoading: authLoading, error: authError, logout } = useAuth();
   const { isLoading: formLoading, error: formError } = useFirebaseAuth();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
@@ -17,7 +16,7 @@ export function EntryTerminal() {
     setSuccessMessage(`[OK] Registration committed for ${username}.`);
   };
 
-  const handleRegisterError = (message: string) => {
+  const handleRegisterError = () => {
     setSuccessMessage(null);
   };
 

@@ -8,7 +8,6 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { BrandHeader } from '@/components/header/BrandHeader';
 import { EntryTerminal } from '@/components/entry-terminal/EntryTerminal';
 import { Dashboard } from '@/components/dashboard/Dashboard';
-import { EvidenceVault } from '@/components/evidence-vault/EvidenceVault';
 
 export default function Home() {
   const { user } = useAuth();
@@ -59,15 +58,9 @@ export default function Home() {
 
             {/* Authenticated content */}
             {user && (
-              <>
-                <motion.div variants={entranceVariants} className="w-full">
-                  <Dashboard />
-                </motion.div>
-                
-                <motion.div variants={entranceVariants} className="w-full">
-                  <EvidenceVault />
-                </motion.div>
-              </>
+              <motion.div variants={entranceVariants} className="w-full">
+                <Dashboard />
+              </motion.div>
             )}
           </motion.div>
         </AnimatePresence>

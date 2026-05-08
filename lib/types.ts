@@ -1,7 +1,10 @@
-export interface Milestone {
+export interface AccountLog {
   id: string;           // UUID, generated client-side
-  title: string;        // Goal title
-  targetDate: string;   // ISO date string (YYYY-MM-DD)
+  source: string;       // Where did you get the money from?
+  description: string;  // Details about the transaction
+  amount: number;       // Amount earned
+  balanceImageUrl: string; // Screenshot of current bank balance
+  timestamp: string;    // ISO date string
   status: 'PENDING' | 'VERIFIED';
 }
 
@@ -27,5 +30,5 @@ export interface User {
 export interface FirestoreUserData {
   username: string;
   email: string;
-  createdAt: any; // Firestore timestamp
+  createdAt: unknown; // Firestore timestamp
 }
