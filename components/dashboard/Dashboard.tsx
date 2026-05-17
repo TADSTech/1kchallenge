@@ -10,6 +10,7 @@ import { UserRanking } from './UserRanking';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useAccountLogs } from '@/lib/hooks/useAccountLogs';
+import Link from 'next/link';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -114,6 +115,25 @@ export function Dashboard() {
               <div className="mt-4 text-[9px] text-cyberLime/30 leading-relaxed uppercase">
                 All transactions are encrypted and mirrored across three secure nodes.
               </div>
+            </div>
+
+            {/* Hackathon Agenda Generator Link Card */}
+            <div className="p-6 border border-pink-500/20 bg-pink-500/5 rounded-lg font-mono relative overflow-hidden group hover:border-blue-400/40 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-pink-500/10 to-blue-500/10 rounded-full blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-500" />
+              <span className="text-[10px] text-pink-500 font-bold block mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+                Active_Tool_Suite
+              </span>
+              <div className="text-white text-xs font-bold mb-1 uppercase tracking-tight">Agenda Generator</div>
+              <p className="text-[9px] text-slate-400 leading-relaxed uppercase mb-4">
+                Generate, preview, and print premium agendas in high-visibility light pastel style.
+              </p>
+              <Link
+                href="/agenda"
+                className="w-full py-2 bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 rounded text-center text-white text-[10px] font-bold uppercase tracking-widest block transition-all hover:shadow-md hover:shadow-pink-500/10 cursor-pointer"
+              >
+                Launch Builder 🚀
+              </Link>
             </div>
           </div>
         </div>

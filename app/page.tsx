@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { BrandHeader } from '@/components/header/BrandHeader';
 import { EntryTerminal } from '@/components/entry-terminal/EntryTerminal';
 import { Dashboard } from '@/components/dashboard/Dashboard';
+import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 
 export default function Home() {
   const { user } = useAuth();
@@ -49,6 +51,21 @@ export default function Home() {
             {/* Brand Header */}
             <motion.div variants={entranceVariants} className="w-full flex justify-center">
               <BrandHeader />
+            </motion.div>
+
+            {/* Quick Access Utility Bar */}
+            <motion.div 
+              variants={entranceVariants} 
+              className="w-full max-w-xl mx-auto px-6 mb-8 text-center relative z-20"
+            >
+              <Link 
+                href="/agenda"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-pink-500/30 bg-pink-500/5 hover:bg-pink-500/10 rounded-full font-mono text-xs text-pink-400 uppercase tracking-widest transition-all duration-300 hover:border-blue-400/40 hover:scale-105 shadow-md shadow-pink-500/5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+                Launch Agenda Builder
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              </Link>
             </motion.div>
             
             {/* Entry Terminal (Registration) */}
