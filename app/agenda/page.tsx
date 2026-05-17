@@ -7,7 +7,6 @@ import {
   Printer, 
   Copy, 
   Check, 
-  FileText, 
   ArrowLeft, 
   Palette, 
   Edit2, 
