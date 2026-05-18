@@ -15,7 +15,9 @@ import {
   RefreshCw,
   Info,
   Sliders,
-  Presentation
+  Presentation,
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import { marked } from 'marked';
@@ -26,6 +28,13 @@ marked.use({
   gfm: true
 });
 
+// Default Vector Banner Graphic templates encoded as instant inline SVGs
+const DEFAULT_AI_FLYER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="250" viewBox="0 0 800 250"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ec4899" stop-opacity="0.85"/><stop offset="100%" stop-color="%233b82f6" stop-opacity="0.85"/></linearGradient></defs><rect width="800" height="250" fill="url(%23g)"/><circle cx="700" cy="125" r="180" fill="white" fill-opacity="0.03"/><circle cx="100" cy="50" r="100" fill="white" fill-opacity="0.03"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="38" letter-spacing="2">GENERATIVE AI SUMMIT 2026</text><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="600" font-size="14" opacity="0.9" letter-spacing="3">CODE • COLLABORATE • INNOVATE</text></svg>`;
+
+const DEFAULT_WEB3_FLYER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="250" viewBox="0 0 800 250"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6" stop-opacity="0.85"/><stop offset="100%" stop-color="%230d9488" stop-opacity="0.85"/></linearGradient></defs><rect width="800" height="250" fill="url(%23g)"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="36" letter-spacing="2">DECENTRALIZED WASM SPRINT</text><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="600" font-size="14" opacity="0.9" letter-spacing="3">RUST-COMPILED BROWSER PERFORMANCE</text></svg>`;
+
+const DEFAULT_HUSTLE_FLYER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="250" viewBox="0 0 800 250"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ec4899" stop-opacity="0.9"/><stop offset="100%" stop-color="%233b82f6" stop-opacity="0.9"/></linearGradient></defs><rect width="800" height="250" fill="url(%23g)"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="36" letter-spacing="2">TADS 1K HUSTLE BOOTCAMP</text><text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="600" font-size="14" opacity="0.9" letter-spacing="3">THREE DAYS • ONE THOUSAND DOLLARS • ZERO EXCUSES</text></svg>`;
+
 // Define theme customizer parameters
 type ThemeName = 'gradient-pink-blue' | 'soft-pink' | 'soft-blue' | 'lavender-mint';
 
@@ -35,6 +44,7 @@ interface AgendaTemplate {
   dates: string;
   planMarkdown: string;
   presentationMarkdown: string;
+  flyerImage: string;
 }
 
 const AGENDA_TEMPLATES: Record<string, AgendaTemplate> = {
@@ -42,6 +52,7 @@ const AGENDA_TEMPLATES: Record<string, AgendaTemplate> = {
     name: '🤖 AI Innovation Hackathon',
     title: '🧠 Generative AI Hackathon 2026',
     dates: 'October 23 - 25, 2026',
+    flyerImage: DEFAULT_AI_FLYER,
     planMarkdown: `# 🚀 Build & Hustle: Generative AI Hackathon
 
 Welcome to the ultimate build sprint! Over the next 48 hours, you will collaborate with top developers, designers, and entrepreneurs to build innovative GenAI-powered web applications. 
@@ -124,6 +135,7 @@ Master your 3-minute demo pitch. Highlight your AI models, validation, and tech 
     name: '🌐 Web3 & WASM Builders Sprint',
     title: '⛓️ WASM & Web3 Decentralized Sprint',
     dates: 'July 10 - 12, 2026',
+    flyerImage: DEFAULT_WEB3_FLYER,
     planMarkdown: `# 🌐 WASM & Web3 Decentralized Sprint
 
 An intensive developers sprint focused on low-level performance, Rust-compiled WebAssembly, and decentralized system architectures.
@@ -184,6 +196,7 @@ Pitching decentralized architectures requires clarity. Focus on performance, sec
     name: '⚡ TADS Hustle Weekend',
     title: '⚡ TADS 1K Challenge Bootcamp',
     dates: 'May 22 - 24, 2026',
+    flyerImage: DEFAULT_HUSTLE_FLYER,
     planMarkdown: `# ⚡ TADS 1K Challenge Bootcamp
 
 Industrialize your hustle. Three days. Zero excuses. Formulate your product, build a high-conversion landing page, and land your first paying customer!
@@ -245,6 +258,7 @@ export default function HackathonAgendaPage(): JSX.Element {
   // Main form states
   const [title, setTitle] = useState(AGENDA_TEMPLATES.ai_hackathon.title);
   const [dates, setDates] = useState(AGENDA_TEMPLATES.ai_hackathon.dates);
+  const [flyerImage, setFlyerImage] = useState<string | null>(AGENDA_TEMPLATES.ai_hackathon.flyerImage);
   const [planMarkdown, setPlanMarkdown] = useState(AGENDA_TEMPLATES.ai_hackathon.planMarkdown);
   const [presentationMarkdown, setPresentationMarkdown] = useState(AGENDA_TEMPLATES.ai_hackathon.presentationMarkdown);
   
@@ -261,6 +275,7 @@ export default function HackathonAgendaPage(): JSX.Element {
   const [parsedPresentationHtml, setParsedPresentationHtml] = useState('');
 
   const previewRef = useRef<HTMLDivElement>(null);
+  const flyerInputRef = useRef<HTMLInputElement>(null);
 
   // Compile both Markdown fields to HTML in real-time
   useEffect(() => {
@@ -284,8 +299,32 @@ export default function HackathonAgendaPage(): JSX.Element {
     const template = AGENDA_TEMPLATES[key];
     setTitle(template.title);
     setDates(template.dates);
+    setFlyerImage(template.flyerImage);
     setPlanMarkdown(template.planMarkdown);
     setPresentationMarkdown(template.presentationMarkdown);
+  };
+
+  // Flyer Upload handlers
+  const handleFlyerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image is too large! Please upload a file under 5MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFlyerImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveFlyer = () => {
+    setFlyerImage(null);
+    if (flyerInputRef.current) {
+      flyerInputRef.current.value = '';
+    }
   };
 
   // Copy helpers
@@ -298,10 +337,12 @@ export default function HackathonAgendaPage(): JSX.Element {
 
   const handleCopyHtml = () => {
     // Wrap with basic container
+    const flyerHtml = flyerImage ? `<div style="margin-bottom: 24px; border-radius: 12px; overflow: hidden;"><img src="${flyerImage}" style="width: 100%; height: auto; max-height: 250px; object-fit: cover;" /></div>` : '';
     const fullHtml = `
 <div class="agenda-document" style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #334155;">
   <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">${title}</h1>
   <div style="font-size: 1rem; color: #64748b; margin-bottom: 24px;">${dates}</div>
+  ${flyerHtml}
   <hr style="border: 0; border-top: 2px solid #f1f5f9; margin-bottom: 32px;" />
   <div class="agenda-section">${parsedPlanHtml}</div>
   <div style="page-break-before: always; border-top: 2px dashed #cbd5e1; margin: 40px 0; padding-top: 40px;"></div>
@@ -338,7 +379,10 @@ export default function HackathonAgendaPage(): JSX.Element {
         windowWidth: 800, // lock width for consistent rendering layout
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      // Crucial Fix: Export as JPEG instead of PNG to completely bypass
+      // jsPDF's internal decoder signature bug ('wrong PNG signature' error)
+      // and drastically reduce final file sizes while retaining pristine quality!
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -352,14 +396,14 @@ export default function HackathonAgendaPage(): JSX.Element {
       let position = 0;
 
       // Add First Page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pageHeight;
 
       // Add subsequent pages if the agenda overflows A4 height
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
         heightLeft -= pageHeight;
       }
 
@@ -582,7 +626,7 @@ export default function HackathonAgendaPage(): JSX.Element {
               <Sparkles className="w-3.5 h-3.5 text-blue-500" />
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Load preset configurations to auto-populate both schedule agenda and presentation pitch structures:
+              Load preset configurations to auto-populate schedule agenda, flyer graphics, and presentation guides:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 pt-1">
               {Object.entries(AGENDA_TEMPLATES).map(([key, template]) => (
@@ -636,6 +680,75 @@ export default function HackathonAgendaPage(): JSX.Element {
                 />
                 <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               </div>
+            </div>
+
+            {/* Input: Hackathon Flyer */}
+            <div className="space-y-1.5 pt-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>Hackathon Flyer Banner</span>
+                {flyerImage && (
+                  <button 
+                    onClick={handleRemoveFlyer} 
+                    className="text-[9px] text-pink-600 hover:text-pink-800 font-bold flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Clear Flyer
+                  </button>
+                )}
+              </label>
+              
+              {flyerImage ? (
+                <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 h-20 flex items-center justify-center group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={flyerImage} alt="Flyer Thumbnail" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label 
+                      htmlFor="flyer-file-update"
+                      className="px-3 py-1 bg-white hover:bg-slate-100 text-slate-900 rounded-lg text-[9px] font-bold shadow cursor-pointer transition-all"
+                    >
+                      Change
+                    </label>
+                    <input
+                      type="file"
+                      id="flyer-file-update"
+                      accept="image/*"
+                      onChange={handleFlyerUpload}
+                      className="hidden"
+                    />
+                    <button 
+                      onClick={handleRemoveFlyer} 
+                      className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-[9px] font-bold shadow transition-all"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    ref={flyerInputRef}
+                    accept="image/*"
+                    onChange={handleFlyerUpload}
+                    className="hidden"
+                    id="flyer-file-input"
+                  />
+                  <label
+                    htmlFor="flyer-file-input"
+                    className="flex-1 py-3 px-4 border border-dashed border-slate-300 hover:border-pink-300 bg-slate-50/50 hover:bg-pink-50/5 rounded-xl text-center text-xs font-semibold text-slate-600 hover:text-pink-600 cursor-pointer transition-all flex items-center justify-center gap-2"
+                  >
+                    <ImageIcon className="w-4 h-4 text-slate-400" />
+                    Upload Local File
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL..."
+                    value={flyerImage || ''}
+                    onChange={(e) => setFlyerImage(e.target.value)}
+                    className="w-1/2 text-slate-800 bg-slate-50/50 border border-slate-200 rounded-xl px-3 text-xs focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-500 focus:bg-white transition-all font-semibold"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -827,7 +940,7 @@ export default function HackathonAgendaPage(): JSX.Element {
                 
                 {/* Header card inside A4 */}
                 <div 
-                  className="rounded-xl border p-6 mb-8 flex flex-col gap-2 relative overflow-hidden"
+                  className="rounded-xl border p-6 mb-6 flex flex-col gap-2 relative overflow-hidden"
                   style={{
                     background: 'var(--header-gradient)',
                     borderColor: 'var(--header-border)'
@@ -862,6 +975,22 @@ export default function HackathonAgendaPage(): JSX.Element {
                     <span>{dates || 'Date TBD'}</span>
                   </div>
                 </div>
+
+                {/* Rendered Hackathon Flyer Image Banner */}
+                {flyerImage && (
+                  <div className="mb-6 rounded-xl overflow-hidden border border-slate-200/80 shadow bg-slate-50/50 max-h-[220px] flex items-center justify-center relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={flyerImage} 
+                      alt="Hackathon Flyer Banner" 
+                      className="w-full h-full object-cover max-h-[220px]"
+                      onError={(e) => {
+                        // Suppress broken images if user types an invalid URL
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* Section 1: Agenda plan.md */}
                 <div 
