@@ -370,41 +370,88 @@ export default function HackathonAgendaPage(): JSX.Element {
       const element = previewRef.current;
       if (!element) return;
 
-      // Render the HTML onto canvas with high scaling for crispness
-      const canvas = await html2canvas(element, {
+      // 1. Save current scroll position
+      const originalScrollY = window.scrollY;
+      
+      // 2. Temporarily scroll to top-left to completely eliminate html2canvas offset bugs
+      window.scrollTo(0, 0);
+
+      // 3. Create a pristine wrapper absolutely positioned at 0,0 
+      // It is z-indexed behind everything so the user doesn't see a flash
+      const printWrapper = document.createElement('div');
+      printWrapper.style.position = 'absolute';
+      printWrapper.style.top = '0px';
+      printWrapper.style.left = '0px';
+      printWrapper.style.zIndex = '-9999';
+      printWrapper.style.background = '#ffffff';
+      
+      const clone = element.cloneNode(true) as HTMLDivElement;
+      
+      // 4. Force clone to be perfectly visible and unconstrained
+      clone.style.display = 'block';
+      clone.style.visibility = 'visible';
+      clone.style.position = 'relative';
+      clone.style.transform = 'none';
+      clone.style.margin = '0';
+      clone.style.width = '210mm'; 
+      clone.style.height = 'auto'; // allow natural height
+      clone.style.overflow = 'visible';
+      
+      printWrapper.appendChild(clone);
+      document.body.appendChild(printWrapper);
+
+      // 5. Yield to the browser to ensure the layout paints the clone before capturing
+      // This is often the primary reason html2canvas renders a completely blank page!
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // 6. Render the perfectly isolated clone at exactly (0,0) with no scroll offsets
+      const canvas = await html2canvas(clone, {
         scale: 2, // 2x retina scaling
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: 800, // lock width for consistent rendering layout
+        logging: false, 
       });
+
+      // 7. Clean up the physical clone immediately and restore user's scroll
+      document.body.removeChild(printWrapper);
+      window.scrollTo(0, originalScrollY);
 
       // Crucial Fix: Export as JPEG instead of PNG to completely bypass
       // jsPDF's internal decoder signature bug ('wrong PNG signature' error)
-      // and drastically reduce final file sizes while retaining pristine quality!
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const canvasWidth = canvas.width || 800;
+      const canvasHeight = canvas.height || 1131;
+
+      // Safe guards to guarantee we never pass 0 or NaN to jsPDF scale
+      const safeWidth = canvasWidth > 0 ? canvasWidth : 800;
+      const safeHeight = canvasHeight > 0 ? canvasHeight : 1131;
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (safeHeight * imgWidth) / safeWidth;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
       // Add First Page
       pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pageHeight;
 
       // Add subsequent pages if the agenda overflows A4 height
-      while (heightLeft >= 0) {
+      let pageCount = 1;
+      while (heightLeft > 0 && pageCount < 10) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
         heightLeft -= pageHeight;
+        pageCount++;
       }
 
       const formattedFileName = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_hackathon_pack.pdf`;
@@ -978,18 +1025,53 @@ export default function HackathonAgendaPage(): JSX.Element {
 
                 {/* Rendered Hackathon Flyer Image Banner */}
                 {flyerImage && (
-                  <div className="mb-6 rounded-xl overflow-hidden border border-slate-200/80 shadow bg-slate-50/50 max-h-[220px] flex items-center justify-center relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={flyerImage} 
-                      alt="Hackathon Flyer Banner" 
-                      className="w-full h-full object-cover max-h-[220px]"
-                      onError={(e) => {
-                        // Suppress broken images if user types an invalid URL
-                        e.currentTarget.style.display = 'none';
+                  flyerImage.startsWith('data:image/svg+xml') ? (
+                    /* Render a gorgeous, native HTML/CSS preset banner that html2canvas will render with 100% precision! */
+                    <div 
+                      className="mb-6 rounded-xl overflow-hidden p-6 flex flex-col items-center justify-center text-center relative min-h-[140px] text-white shadow-md border"
+                      style={{
+                        background: selectedTheme === 'lavender-mint' 
+                          ? 'linear-gradient(135deg, #8b5cf6 0%, #0d9488 100%)' 
+                          : selectedTheme === 'soft-pink'
+                          ? 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)'
+                          : selectedTheme === 'soft-blue'
+                          ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                          : 'linear-gradient(135deg, #ec4899 0%, #3b82f6 100%)',
+                        borderColor: 'var(--header-border)'
                       }}
-                    />
-                  </div>
+                    >
+                      {/* Decorative grid overlay */}
+                      <div className="absolute inset-0 opacity-[0.05] pointer-events-none rounded-xl"
+                        style={{
+                          backgroundImage: 'radial-gradient(circle, white 10%, transparent 20%)',
+                          backgroundSize: '12px 12px'
+                        }}
+                      />
+                      <span className="text-[8px] font-bold uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full mb-1 relative z-10">
+                        {title.toUpperCase().includes('AI') ? 'Artificial Intelligence Summit' : 'Decentralized Developer Sprint'}
+                      </span>
+                      <h3 className="text-lg md:text-xl font-black uppercase tracking-wider mb-1 leading-tight relative z-10">
+                        {title || 'HACKATHON EVENT'}
+                      </h3>
+                      <p className="text-[9px] opacity-90 tracking-widest font-semibold uppercase relative z-10">
+                        {dates || 'CODE • BUILD • VALIDATE'}
+                      </p>
+                    </div>
+                  ) : (
+                    /* If it's a custom uploaded image (base64 PNG/JPG) or hosted URL */
+                    <div className="mb-6 rounded-xl overflow-hidden border border-slate-200/80 shadow bg-slate-50/50 max-h-[220px] flex items-center justify-center relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={flyerImage} 
+                        alt="Hackathon Flyer Banner" 
+                        className="w-full h-full object-cover max-h-[220px]"
+                        onError={(e) => {
+                          // Suppress broken images if user types an invalid URL
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )
                 )}
 
                 {/* Section 1: Agenda plan.md */}
